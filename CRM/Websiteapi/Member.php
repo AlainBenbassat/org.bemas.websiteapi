@@ -22,9 +22,11 @@ class CRM_Websiteapi_Member {
       and
         c.contact_type = 'Organization'
       and
-        m.start_date <= %1
-      and
-        m.end_date >= %2
+        m.status_id = 2 or (
+          m.start_date <= %1
+        and
+          m.end_date >= %2
+        )
       order by
         c.sort_name
     ";
@@ -36,4 +38,24 @@ class CRM_Websiteapi_Member {
     $dao = CRM_Core_DAO::executeQuery($sql, $sqlParams);
     return $dao->fetchAll();
   }
+
+  public function isMember($contactId) {
+    $startDate = date('Y-m-d');
+    $endDate = date('Y-m-d');
+
+    $sql = "select count(id) from civicrm_membership where (status_id = 2 or (start_date <= %1 and end_date >= %2)) and contact_id = %3";
+    $sqlParams = [
+      1 => [$startDate, 'String'],
+      2 => [$endDate, 'String'],
+      3 => [$contactId, 'Integer'],
+    ];
+    $memberCount = CRM_Core_DAO::singleValueQuery($sql, $sqlParams);
+    if ($memberCount) {
+      return 1;
+    }
+    else {
+      return 0;
+    }
+  }
+
 }
