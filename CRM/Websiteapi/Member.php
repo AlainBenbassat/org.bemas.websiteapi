@@ -7,11 +7,16 @@ class CRM_Websiteapi_Member {
 
     $sql = "
       select
-        c.organization_name
+        c.id,
+        c.organization_name,
+        a.postal_code,
+        a.city
       from
         civicrm_contact c
       inner join
         civicrm_membership m on m.contact_id = c.id
+      left outer join
+        civicrm_address a on a.contact_id = c.id and a.is_primary = 1
       where
         c.is_deleted = 0
       and
