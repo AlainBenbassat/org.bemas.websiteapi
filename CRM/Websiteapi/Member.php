@@ -20,6 +20,8 @@ class CRM_Websiteapi_Member {
         m.start_date <= %1
       and
         m.end_date >= %2
+      order by
+        c.sort_name
     ";
     $sqlParams = [
       1 => [$startDate, 'String'],
