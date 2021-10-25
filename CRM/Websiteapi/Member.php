@@ -27,6 +27,8 @@ class CRM_Websiteapi_Member {
         and
           m.end_date >= %2
         )
+      and
+        m.owner_membership_id is null
       order by
         c.sort_name
     ";
