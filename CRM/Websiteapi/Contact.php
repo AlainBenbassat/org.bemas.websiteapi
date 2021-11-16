@@ -99,4 +99,34 @@ class CRM_Websiteapi_Contact {
     ]);
   }
 
+  public function createContact($email, $uid) {
+    $contact = $this->getContactByUid($uid);
+    if ($contact) {
+      return $contact;
+    }
+
+    $params = [
+      'sequential' => 1,
+      'contact_type' => 'Individual',
+      'last_name' => $email,
+    ];
+    $result = civicrm_api3('Contact', 'create', $params);
+    $contactId = $result['id'];
+
+    $this->setEmail($contactId, $email);
+    $this->setContactUid($contactId, $uid);
+
+    return $contactId;
+  }
+
+  public function setEmail($contactId, $email) {
+    $params = [
+      'sequential' => 1,
+      'email' => $email,
+      'contact_id' => $contactId,
+      'location_type_id' => 3,
+    ];
+    $result = civicrm_api3('Email', 'create', $params);
+  }
+
 }
