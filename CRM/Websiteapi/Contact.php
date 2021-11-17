@@ -102,7 +102,7 @@ class CRM_Websiteapi_Contact {
   public function createContact($email, $uid) {
     $contact = $this->getContactByUid($uid);
     if ($contact) {
-      return $contact;
+      return $contact[0]['id'];
     }
 
     $params = [
