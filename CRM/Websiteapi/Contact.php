@@ -99,7 +99,7 @@ class CRM_Websiteapi_Contact {
     ]);
   }
 
-  public function createContact($email, $uid) {
+  public function createContact($email, $uid, $firstName, $lastName) {
     $contact = $this->getContactByUid($uid);
     if ($contact) {
       return $contact[0]['id'];
@@ -108,7 +108,8 @@ class CRM_Websiteapi_Contact {
     $params = [
       'sequential' => 1,
       'contact_type' => 'Individual',
-      'last_name' => $email,
+      'first_name' => $firstName,
+      'last_name' => $lastName,
     ];
     $result = civicrm_api3('Contact', 'create', $params);
     $contactId = $result['id'];
