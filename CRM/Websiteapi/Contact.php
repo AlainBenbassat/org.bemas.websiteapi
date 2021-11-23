@@ -49,12 +49,17 @@ class CRM_Websiteapi_Contact {
         ch.identifier uid,
         c.first_name,
         c.last_name,
+        substring(c.preferred_language, 1, 2) language_code,
         c.job_title,
+        e.email,
+        p.phone,
         c.organization_name
       from
         civicrm_contact c
       left outer join
         civicrm_email e on e.contact_id = c.id and e.is_primary = 1
+      left outer join
+        civicrm_phone p on p.contact_id = c.id and p.is_primary = 1
       left outer join
         civicrm_value_contact_id_history ch on ch.entity_id = c.id and identifier_type = 1
       where
@@ -75,6 +80,9 @@ class CRM_Websiteapi_Contact {
         'uid' => $dao->uid,
         'first_name' => $dao->first_name,
         'last_name' => $dao->last_name,
+        'email' => $dao->email,
+        'phone' => $dao->phone,
+        'language_code' => $dao->language_code,
         'organization_name' => $dao->organization_name,
         'job_title' => $dao->job_title,
         'is_member' => $member->isMember($contactId),
@@ -99,8 +107,8 @@ class CRM_Websiteapi_Contact {
     ]);
   }
 
-  public function createContact($email, $uid, $firstName, $lastName) {
-    $contact = $this->getContactByUid($uid);
+  public function createContact($apiParams) {
+    $contact = $this->getContactByUid($apiParams['uid']);
     if ($contact) {
       return $contact[0]['id'];
     }
@@ -108,14 +116,25 @@ class CRM_Websiteapi_Contact {
     $params = [
       'sequential' => 1,
       'contact_type' => 'Individual',
-      'first_name' => $firstName,
-      'last_name' => $lastName,
+      'first_name' => $apiParams['first_name'],
+      'last_name' => $apiParams['last_name'],
+      'job_title' => $apiParams['job_title'],
+      'preferred_language' => $this->addCountryCodeToLanguageCode($apiParams['language_code']),
     ];
+
     $result = civicrm_api3('Contact', 'create', $params);
     $contactId = $result['id'];
 
-    $this->setEmail($contactId, $email);
-    $this->setContactUid($contactId, $uid);
+    $this->setEmail($contactId, $apiParams['email']);
+    $this->setContactUid($contactId, $apiParams['uid']);
+
+    if ($apiParams['phone']) {
+      $this->setPhone($contactId, $apiParams['phone']);
+    }
+
+    if ($apiParams['company']) {
+      $this->setEmployer($contactId, $apiParams['company']);
+    }
 
     return $contactId;
   }
@@ -128,6 +147,40 @@ class CRM_Websiteapi_Contact {
       'location_type_id' => 3,
     ];
     $result = civicrm_api3('Email', 'create', $params);
+  }
+
+  public function setPhone($contactId, $phone) {
+    $params = [
+      'sequential' => 1,
+      'phone' => $phone,
+      'contact_id' => $contactId,
+      'location_type_id' => 3,
+      'phone_type_id' => 1,
+    ];
+    $result = civicrm_api3('Phone', 'create', $params);
+  }
+
+  public function setEmployer($contactId, $company) {
+    $params = [
+      'entity_id' => $contactId,
+      'custom_74' => $company,
+    ];
+    civicrm_api3('CustomValue', 'create', $params);
+  }
+
+  private function addCountryCodeToLanguageCode($languageCode) {
+    if ($languageCode == 'nl') {
+      return 'nl_NL';
+    }
+    if ($languageCode == 'fr') {
+      return 'fr_FR';
+    }
+    if ($languageCode == 'en') {
+      return 'en_US';
+    }
+    else {
+      return '';
+    }
   }
 
 }

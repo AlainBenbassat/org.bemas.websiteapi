@@ -10,13 +10,27 @@ class CRM_Websiteapi_Member {
         c.id,
         c.organization_name,
         a.postal_code,
-        a.city
+        a.city,
+        ctry.iso_code country_code,
+        w.url,
+        e.email,
+        activity__nl__3 activity_nl,
+        activity__fr__5 activity_fr,
+        activity__en__4 activity_en
       from
         civicrm_contact c
       inner join
         civicrm_membership m on m.contact_id = c.id
       left outer join
         civicrm_address a on a.contact_id = c.id and a.is_primary = 1
+      left outer join
+        civicrm_country ctry on ctry.id = a.country_id
+      left outer join
+        civicrm_value_activity_9 act on act.entity_id = c.id
+      left outer join
+        civicrm_website w on w.contact_id = c.id and w.website_type_id = 6
+      left outer join
+        civicrm_email e on e.contact_id = c.id and e.is_primary = 1
       where
         c.is_deleted = 0
       and
