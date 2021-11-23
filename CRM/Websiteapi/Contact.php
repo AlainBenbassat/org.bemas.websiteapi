@@ -166,6 +166,28 @@ class CRM_Websiteapi_Contact {
       'custom_74' => $company,
     ];
     civicrm_api3('CustomValue', 'create', $params);
+
+    // additionally, set the current employer to *
+    $params = [
+      'id' => $contactId,
+      'employer_id' => $this->getContactIdOrgAsterisk(),
+    ];
+    civicrm_api3('Contact', 'create', $params);
+  }
+
+  private function getContactIdOrgAsterisk() {
+    $sql = "
+      select
+        id
+      from
+        civicrm_contact
+      where
+        is_deleted = 0
+      and
+        nick_name = '*'
+    ";
+
+    return CRM_Core_DAO::singleValueQuery($sql);
   }
 
   private function addCountryCodeToLanguageCode($languageCode) {
