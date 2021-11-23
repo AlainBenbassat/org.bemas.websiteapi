@@ -9,7 +9,7 @@ function _civicrm_api3_bemaswebsite_Createcontact_spec(&$spec) {
   $spec['language_code']['api.required'] = 1;
   $spec['phone']['api.required'] = 0;
   $spec['job_title']['api.required'] = 0;
-  $spec['company']['api.required'] = 0;
+  $spec['organization_name']['api.required'] = 0;
 }
 
 function civicrm_api3_bemaswebsite_Createcontact($params) {

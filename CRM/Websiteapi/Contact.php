@@ -132,8 +132,8 @@ class CRM_Websiteapi_Contact {
       $this->setPhone($contactId, $apiParams['phone']);
     }
 
-    if ($apiParams['company']) {
-      $this->setEmployer($contactId, $apiParams['company']);
+    if ($apiParams['organization_name']) {
+      $this->setEmployer($contactId, $apiParams['organization_name']);
     }
 
     return $contactId;
