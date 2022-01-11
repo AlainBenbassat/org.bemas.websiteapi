@@ -12,6 +12,6 @@ function civicrm_api3_bemaswebsite_Getmembers($params) {
     return civicrm_api3_create_success($members, $params, 'Bemaswebsite', 'Getmembers');
   }
   catch (Exception $e) {
-    throw new API_Exception($e->getMessage(),$e->getCode());
+    throw new API_Exception($e->getMessage(), $e->getCode());
   }
 }
