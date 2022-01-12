@@ -21,7 +21,7 @@ class CRM_Websiteapi_Order {
     $fields = ['order_id', 'contact_id', 'order_date', 'order_status'];
     $orderHeader = [];
     foreach ($fields as $field) {
-      $orderHeader[$field] = $apiParams[$field];
+      $orderHeader[$field] = $apiParams->$field;
     }
 
     return $orderHeader;
@@ -46,6 +46,8 @@ class CRM_Websiteapi_Order {
       $this->orderValidator->validateEventId($product->product_id, $orderHeader['order_date']);
       $participants = $this->decodeParticipants($product->participants);
       foreach ($participants as $participant) {
+        $this->orderValidator->validateParticipant($participant);
+
         $part = new CRM_Websiteapi_Participant();
         $part->createEventRegistration($orderHeader, $product, $participant);
       }

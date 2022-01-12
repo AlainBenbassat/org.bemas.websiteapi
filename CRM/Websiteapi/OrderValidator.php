@@ -40,6 +40,12 @@ class CRM_Websiteapi_OrderValidator {
     }
   }
 
+  public function validateParticipant($participant) {
+    $this->validateParticipantEmail($participant);
+    $this->validateParticipantFirstName($participant);
+    $this->validateParticipantLastName($participant);
+  }
+
   private function validateContact($contactId) {
     $contact = $this->getContactById($contactId);
 
@@ -94,6 +100,24 @@ class CRM_Websiteapi_OrderValidator {
 
     if (!is_numeric($product->product_price)) {
       throw new Exception('product_price should be numeric');
+    }
+  }
+
+  private function validateParticipantEmail($participant) {
+    if (empty($participant->email)) {
+      throw new Exception('Participant should have a field email');
+    }
+  }
+
+  private function validateParticipantFirstName($participant) {
+    if (empty($participant->first_name)) {
+      throw new Exception('Participant should have a field first_name');
+    }
+  }
+
+  private function validateParticipantLastName($participant) {
+    if (empty($participant->last_name)) {
+      throw new Exception('Participant should have a field last_name');
     }
   }
 
