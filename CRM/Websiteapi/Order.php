@@ -1,124 +1,81 @@
 <?php
 
 class CRM_Websiteapi_Order {
-  public function createOrder($apiParams) {
-    $this->validateContact($apiParams['contact_id']);
-    $this->validateOrderStatus($apiParams['order_status']);
-    $this->validateTotalAmount($apiParams['total_amount']);
+  private $orderValidator;
 
+  public function __construct() {
+    $this->orderValidator = new CRM_Websiteapi_OrderValidator();
+  }
+
+  public function createOrder($apiParams) {
+    $this->orderValidator->validateOrderHeader($apiParams);
+
+    $orderHeader = $this->getOrderHeader($apiParams);
     $products = $this->decodeProducts($apiParams['products']);
     foreach ($products as $product) {
-      $this->saveProduct($apiParams['contact_id'], $apiParams['order_date'], $apiParams['order_status'], $product);
+      $this->saveProduct($orderHeader, $product);
     }
   }
 
-  private function validateContact($contactId) {
-    $contact = $this->getContactById($contactId);
-
-    $this->validateContactExists($contactId, $contact);
-    $this->validateContactIsNotDeleted($contactId, $contact);
-    $this->validateContactIsIndividual($contactId, $contact);
-  }
-
-  private function validateContactExists($contactId, $contact) {
-    if ($contact === FALSE) {
-      throw new Exception('Contact with id = ' . $contactId . ' not found');
+  private function getOrderHeader($apiParams) {
+    $fields = ['order_id', 'contact_id', 'order_date', 'order_status'];
+    $orderHeader = [];
+    foreach ($fields as $field) {
+      $orderHeader[$field] = $apiParams[$field];
     }
-  }
 
-  private function validateContactIsNotDeleted($contactId, $contact) {
-    if ($contact['is_deleted'] == 1) {
-      throw new Exception('Contact with id = ' . $contactId . ' is deleted');
-    }
-  }
-
-  private function validateContactIsIndividual($contactId, $contact) {
-    if ($contact['contact_type'] != 'Individual') {
-      throw new Exception('Contact with id = ' . $contactId . ' is not an individual');
-    }
+    return $orderHeader;
   }
 
   private function decodeProducts($jsonProducts) {
     $decodedProducts = json_decode($jsonProducts);
 
-    $this->validateProducts($decodedProducts);
+    $this->orderValidator->validateProducts($decodedProducts);
 
     return $decodedProducts;
   }
 
-  private function validateProducts($decodedProducts) {
-    if ($decodedProducts == null) {
-      throw new Exception('Cannot decode products.');
+  private function saveProduct($orderHeader, $product) {
+    $this->orderValidator->validateProduct($product);
+
+    if ($this->isProductBook($product)) {
+      $contrib = new CRM_Websiteapi_Contribution();
+      $contrib->createBookPurchase($orderHeader, $product);
     }
-
-    if (!is_array($decodedProducts)) {
-      throw new Exception('Products should be an array.');
-    }
-  }
-
-  private function validateProduct($product) {
-    $this->validateProductType($product);
-    $this->validateProductId($product);
-    $this->validateProductPrice($product);
-  }
-
-  private function validateProductType($product) {
-    if (empty($product->product_type)) {
-      throw new Exception('Product should have a field product_type');
-    }
-
-    $validProductTypes = ['book', 'event'];
-    if (!in_array($product->product_type, $validProductTypes)) {
-      throw new Exception('Product type should be: ' . implode(', ', $validProductTypes));
+    elseif ($this->isProductEvent($product)) {
+      $this->orderValidator->validateEventId($product->product_id, $orderHeader['order_date']);
+      $participants = $this->decodeParticipants($product->participants);
+      foreach ($participants as $participant) {
+        $part = new CRM_Websiteapi_Participant();
+        $part->createEventRegistration($orderHeader, $product, $participant);
+      }
     }
   }
 
-  private function validateProductId($product) {
-    if (empty($product->product_id)) {
-      throw new Exception('Product should have a field product_id');
-    }
-
-    if (!is_numeric($product->product_id)) {
-      throw new Exception('product_id should be numeric');
-    }
-  }
-
-  private function validateProductPrice($product) {
-    if (empty($product->product_price)) {
-      throw new Exception('Product should have a field product_price');
-    }
-
-    if (!is_numeric($product->product_price)) {
-      throw new Exception('product_price should be numeric');
-    }
-  }
-
-  private function saveProduct($contactId, $orderDate, $orderStatus, $product) {
-    $this->validateProduct($product);
-  }
-
-  private function getContactById($contactId) {
-    $result = civicrm_api3('Contact', 'get', ['id' => $contactId, 'sequential' => 1]);
-    if ($result['count'] > 0) {
-      return $result['values'][0];
+  private function isProductBook($product) {
+    if ($product->product_type == 'book') {
+      return TRUE;
     }
     else {
       return FALSE;
     }
   }
 
-  private function validateOrderStatus($orderStatus) {
-    if ($orderStatus == 'paid' || $orderStatus == 'pay_later') {
-      // OK
+  private function isProductEvent($product) {
+    if ($product->product_type == 'event') {
+      return TRUE;
     }
     else {
-      throw new Exception('Invalid order status. Should be: paid|pay_later');
+      return FALSE;
     }
   }
 
-  private function validateTotalAmount($totalAmount) {
-    if (!is_numeric($totalAmount)) {
-      throw new Exception('Invalid total amount');
-    }
+  private function decodeParticipants($jsonParticipants) {
+    $decodedParticipants = json_decode($jsonParticipants);
+
+    $this->orderValidator->validateParticipants($decodedParticipants);
+
+    return $decodedParticipants;
   }
+
 }
