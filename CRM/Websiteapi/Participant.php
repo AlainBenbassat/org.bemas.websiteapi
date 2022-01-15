@@ -9,7 +9,7 @@ class CRM_Websiteapi_Participant {
       $participantId = $this->saveEventRegistration($orderHeader, $product, $contactId, $eventId);
 
       if ($product->total_amount > 0) {
-        $this->saveEventPayment();
+        $this->saveEventPayment($orderHeader, $product, $contactId, $eventId, $participantId);
       }
     }
   }
@@ -21,8 +21,8 @@ class CRM_Websiteapi_Participant {
       'last_name' => $participant->last_name,
       'email' => $participant->email,
       'contact_type' => 'Individual',
+      'location_type_id' => 3,
     ];
-
     $contact = civicrm_api3('Contact', 'getorcreate', $params);
     return $contact['id'];
   }
@@ -47,10 +47,26 @@ class CRM_Websiteapi_Participant {
       'source' => 'OrderId:' . $orderHeader['order_id'],
       'fee_amount' => $product->total_amount,
       'status_id' => 1, // registered
+      'role_id' => 1,
     ];
 
     $participant = civicrm_api3('Participant', 'create', $params);
 
-    return $participant['id'];
+    return $participant['values'][0]['id'];
+  }
+
+  private function saveEventPayment($orderHeader, $product, $contactId, $eventId, $participantId) {
+    $contrib = new CRM_Websiteapi_Contribution();
+    $contribId = $contrib->createParticipantPayment($orderHeader, $product, $contactId, $participantId);
+
+    $this->linkContributionToParticipant($contribId, $participantId);
+  }
+
+  private function linkContributionToParticipant($contributionId, $participantId) {
+    $params = [
+      'participant_id' => $participantId,
+      'contribution_id' => $contributionId,
+    ];
+    civicrm_api3('ParticipantPayment', 'create', $params);
   }
 }

@@ -21,7 +21,7 @@ class CRM_Websiteapi_Order {
     $fields = ['order_id', 'contact_id', 'order_date', 'order_status'];
     $orderHeader = [];
     foreach ($fields as $field) {
-      $orderHeader[$field] = $apiParams->$field;
+      $orderHeader[$field] = $apiParams[$field];
     }
 
     return $orderHeader;
@@ -44,8 +44,9 @@ class CRM_Websiteapi_Order {
     }
     elseif ($this->isProductEvent($product)) {
       $this->orderValidator->validateEventId($product->product_id, $orderHeader['order_date']);
-      $participants = $this->decodeParticipants($product->participants);
-      foreach ($participants as $participant) {
+      $this->orderValidator->validateParticipants($product->participants);
+
+      foreach ($product->participants as $participant) {
         $this->orderValidator->validateParticipant($participant);
 
         $part = new CRM_Websiteapi_Participant();
@@ -70,14 +71,6 @@ class CRM_Websiteapi_Order {
     else {
       return FALSE;
     }
-  }
-
-  private function decodeParticipants($jsonParticipants) {
-    $decodedParticipants = json_decode($jsonParticipants);
-
-    $this->orderValidator->validateParticipants($decodedParticipants);
-
-    return $decodedParticipants;
   }
 
 }

@@ -20,7 +20,10 @@ class CRM_Websiteapi_OrderValidator {
   public function validateProduct($product) {
     $this->validateProductType($product);
     $this->validateProductId($product);
-    $this->validateProductPrice($product);
+    $this->validateProductTitle($product);
+    $this->validateProductUnitPrice($product);
+    $this->validateProductQuantity($product);
+    $this->validateProductTotalAmount($product);
   }
 
   public function validateEventId($eventId, $orderDate) {
@@ -93,13 +96,39 @@ class CRM_Websiteapi_OrderValidator {
     }
   }
 
-  private function validateProductPrice($product) {
-    if (empty($product->product_price)) {
-      throw new Exception('Product should have a field product_price');
+  private function validateProductTitle($product) {
+    if (empty($product->product_title)) {
+      throw new Exception('Product should have a field product_title');
+    }
+  }
+
+  private function validateProductUnitPrice($product) {
+    if (empty($product->unit_price)) {
+      throw new Exception('Product should have a field unit_price');
     }
 
-    if (!is_numeric($product->product_price)) {
-      throw new Exception('product_price should be numeric');
+    if (!is_numeric($product->unit_price)) {
+      throw new Exception('unit_price should be numeric');
+    }
+  }
+
+  private function validateProductQuantity($product) {
+    if (empty($product->quantity)) {
+      throw new Exception('Product should have a field quantity');
+    }
+
+    if (!is_numeric($product->quantity)) {
+      throw new Exception('quantity should be numeric');
+    }
+  }
+
+  private function validateProductTotalAmount($product) {
+    if (empty($product->total_amount)) {
+      throw new Exception('Product should have a field total_amount');
+    }
+
+    if (!is_numeric($product->total_amount)) {
+      throw new Exception('total_amount should be numeric');
     }
   }
 
