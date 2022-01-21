@@ -6,7 +6,7 @@ class CRM_Websiteapi_Contribution {
   private const CONTRIBUTION_FINANCIAL_TYPE_EVENT = 4;
   private const CONTRIBUTION_FINANCIAL_TYPE_PRODUCT = 5;
 
-  public function createBookPurchase($orderHeader, $product) {
+  public function createDefaultPurchase($orderHeader, $product) {
     $params = [
       'source' => 'OrderID:' . $orderHeader['order_id'],
       'financial_type_id' => self::CONTRIBUTION_FINANCIAL_TYPE_PRODUCT,

@@ -38,9 +38,9 @@ class CRM_Websiteapi_Order {
   private function saveProduct($orderHeader, $product) {
     $this->orderValidator->validateProduct($product);
 
-    if ($this->isProductBook($product)) {
+    if ($this->isProductDefault($product)) {
       $contrib = new CRM_Websiteapi_Contribution();
-      $contrib->createBookPurchase($orderHeader, $product);
+      $contrib->createDefaultPurchase($orderHeader, $product);
     }
     elseif ($this->isProductEvent($product)) {
       $this->orderValidator->validateEventId($product->product_id, $orderHeader['order_date']);
@@ -55,8 +55,8 @@ class CRM_Websiteapi_Order {
     }
   }
 
-  private function isProductBook($product) {
-    if ($product->product_type == 'book') {
+  private function isProductDefault($product) {
+    if ($product->product_type == 'default') {
       return TRUE;
     }
     else {

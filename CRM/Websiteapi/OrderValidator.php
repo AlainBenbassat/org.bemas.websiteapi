@@ -80,7 +80,7 @@ class CRM_Websiteapi_OrderValidator {
       throw new Exception('Product should have a field product_type');
     }
 
-    $validProductTypes = ['book', 'event'];
+    $validProductTypes = ['default', 'event'];
     if (!in_array($product->product_type, $validProductTypes)) {
       throw new Exception('Product type should be: ' . implode(', ', $validProductTypes));
     }
