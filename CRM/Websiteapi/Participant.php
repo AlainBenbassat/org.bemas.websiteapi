@@ -11,6 +11,10 @@ class CRM_Websiteapi_Participant {
       if ($product->total_amount > 0) {
         $this->saveEventPayment($orderHeader, $product, $contactId, $eventId, $participantId);
       }
+
+      if (!empty($product->notes)) {
+        $this->saveRegistrationNotes($participantId, $product->notes);
+      }
     }
   }
 
@@ -68,5 +72,14 @@ class CRM_Websiteapi_Participant {
       'contribution_id' => $contributionId,
     ];
     civicrm_api3('ParticipantPayment', 'create', $params);
+  }
+
+  private function saveRegistrationNotes($participantId, $notes) {
+    $params = [
+      'entity_table' => 'civicrm_participant',
+      'entity_id' => $participantId,
+      'note' => $notes,
+    ];
+    civicrm_api3('Note', 'create', $params);
   }
 }
