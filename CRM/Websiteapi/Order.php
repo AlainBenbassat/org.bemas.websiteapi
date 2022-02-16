@@ -46,12 +46,15 @@ class CRM_Websiteapi_Order {
       $this->orderValidator->validateEventId($product->product_id, $orderHeader['order_date']);
       $this->orderValidator->validateParticipants($product->participants);
 
+      $registeredContactIds = [];
       foreach ($product->participants as $participant) {
         $this->orderValidator->validateParticipant($participant);
 
         $part = new CRM_Websiteapi_Participant();
-        $part->createEventRegistration($orderHeader, $product, $participant);
+        $registeredContactIds[] = $part->createEventRegistration($orderHeader, $product, $participant);
       }
+
+      $part->fillRegisteredBy($product->product_id, $orderHeader['contact_id'], $registeredContactIds[]);
     }
   }
 

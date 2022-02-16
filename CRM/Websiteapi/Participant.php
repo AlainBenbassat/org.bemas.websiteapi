@@ -16,6 +16,47 @@ class CRM_Websiteapi_Participant {
         $this->saveRegistrationNotes($participantId, $product->notes);
       }
     }
+
+    return $contactId;
+  }
+
+  public function fillRegisteredBy($eventId, $mainContactId, $contactIdParticipants) {
+    $mainContactParticipantId = $this->getParticipantId($eventId, $mainContactId);
+    if (!$mainContactParticipantId) {
+      $mainContactParticipantId = $this->registerAsTrainingResponsible($eventId, $mainContactId);
+    }
+
+    foreach ($contactIdParticipants as $contactIdParticipant) {
+      if ($contactIdParticipant != $mainContactId) {
+        $participantId = $this->getParticipantId($eventId, $contactIdParticipant);
+        $this->setRegisterBy($mainContactParticipantId, $participantId);
+      }
+    }
+  }
+
+  private function getParticipantId($eventId, $contactId) {
+    $participant = civicrm_api3('Participant', 'getsingle', [
+      'contact_id' => $contactId,
+      'event_id' => $eventId,
+    ]);
+
+    return $participant['id'];
+  }
+
+  private function setRegisterBy($mainContactParticipantId, $participantId) {
+    $sql = "update civicrm_participant set registered_by_id = $mainContactParticipantId where id = $participantId";
+    CRM_Core_DAO::executeQuery($sql);
+  }
+
+  private function registerAsTrainingResponsible($eventId, $contactId) {
+    $participant = civicrm_api3('Participant', 'create', [
+      'contact_id' => $contactId,
+      'event_id' => $eventId,
+      'status_id' => 1, // registered
+      'role_id' => [5], // event responsible
+    ]);
+
+    return $participant['id'];
   }
 
   private function getContactId($participant) {
