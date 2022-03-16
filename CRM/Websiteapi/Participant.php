@@ -34,6 +34,78 @@ class CRM_Websiteapi_Participant {
     }
   }
 
+  public function getEventRegistrations($contactId, $language) {
+    $registrations = [];
+
+    $languageCode = $this->getLanguagePrefix($language);
+
+    $sql = "
+      select
+        date_format(e.start_date, '%Y-%m-%d') event_start_date,
+        e.id event_id,
+        e.title event_title,
+        date_format(p.register_date, '%Y-%m-%d') registration_date,
+        s.label registration_status
+      from
+        civicrm_participant p
+      inner join
+        civicrm_event_$languageCode e on e.id = p.event_id
+      inner join
+        civicrm_participant_status_type_$languageCode s on p.status_id = s.id
+      where
+        p.contact_id = %1
+      order by
+        e.start_date desc
+      limit
+        0,25
+    ";
+    $sqlParams = [
+      1 => [$contactId, 'Integer'],
+    ];
+    $dao = CRM_Core_DAO::executeQuery($sql, $sqlParams);
+
+    while ($dao->fetch()) {
+      $registrations[] = [
+        'event_start_date' => $dao->event_start_date,
+        'event_id' => $dao->event_id,
+        'event_title' => $dao->event_title,
+        'registration_date' => $dao->registration_date,
+        'registration_status' => $dao->registration_status,
+      ];
+    }
+
+    return $registrations;
+  }
+
+  public function hasEventRegistration($contactId, $eventId) {
+    $sql = "
+      select
+        p.id
+      from
+        civicrm_participant p
+      inner join
+        civicrm_participant_status_type s on p.status_id = s.id
+      where
+        p.contact_id = %1
+      and
+        p.event_id = %2
+      and
+        s.is_counted = 1
+    ";
+    $sqlParams = [
+      1 => [$contactId, 'Integer'],
+      2 => [$eventId, 'Integer'],
+    ];
+    $participantId = CRM_Core_DAO::singleValueQuery($sql, $sqlParams);
+
+    if ($participantId) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+
   private function getParticipantId($eventId, $contactId) {
     $participant = civicrm_api3('Participant', 'getsingle', [
       'contact_id' => $contactId,
@@ -122,5 +194,20 @@ class CRM_Websiteapi_Participant {
       'note' => $notes,
     ];
     civicrm_api3('Note', 'create', $params);
+  }
+
+  private function getLanguagePrefix($language) {
+    $lowercaseLang = strtolower($language);
+
+    switch ($lowercaseLang) {
+      case 'en_us':
+      case 'en':
+        return 'en_US';
+      case 'fr_fr':
+      case 'fr':
+        return 'fr_FR';
+      default:
+        return 'nl_NL';
+    }
   }
 }
