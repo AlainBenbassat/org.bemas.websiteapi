@@ -57,7 +57,7 @@ class CRM_Websiteapi_Participant {
       order by
         e.start_date desc
       limit
-        0,25
+        0,100
     ";
     $sqlParams = [
       1 => [$contactId, 'Integer'],
