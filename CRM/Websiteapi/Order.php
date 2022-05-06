@@ -54,7 +54,7 @@ class CRM_Websiteapi_Order {
         $registeredContactIds[] = $part->createEventRegistration($orderHeader, $product, $participant);
       }
 
-      $part->fillRegisteredBy($product->product_id, $orderHeader['contact_id'], $registeredContactIds[]);
+      $part->fillRegisteredBy($product->product_id, $orderHeader['contact_id'], $registeredContactIds);
     }
   }
 
