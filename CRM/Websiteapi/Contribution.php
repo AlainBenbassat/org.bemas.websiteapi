@@ -37,7 +37,7 @@ class CRM_Websiteapi_Contribution {
       'financial_type_id' => self::CONTRIBUTION_FINANCIAL_TYPE_EVENT,
       'contact_id' => $contactId,
       'receive_date' => $orderHeader['order_date'],
-      'total_amount' => $product->total_amount,
+      'total_amount' => $product->unit_price,
       'is_pay_later' => $this->getIsPayLaterFromOrderStatus($orderHeader['order_status']),
       'contribution_status_id' => $this->getContributionStatusFromOrderStatus($orderHeader['order_status']),
       'payment_instrument' => 'EFT',
