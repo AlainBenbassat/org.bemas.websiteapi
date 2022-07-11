@@ -2,9 +2,11 @@
 
 class CRM_Websiteapi_Order {
   private $orderValidator;
+  private $orderActivity;
 
   public function __construct() {
     $this->orderValidator = new CRM_Websiteapi_OrderValidator();
+    $this->orderActivity = new CRM_Websiteapi_OrderActivity();
   }
 
   public function createOrder($apiParams) {
@@ -15,6 +17,8 @@ class CRM_Websiteapi_Order {
     foreach ($products as $product) {
       $this->saveProduct($orderHeader, $product);
     }
+
+    $this->orderActivity->create($orderHeader, $products);
   }
 
   private function getOrderHeader($apiParams) {

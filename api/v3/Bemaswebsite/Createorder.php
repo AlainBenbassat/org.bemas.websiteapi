@@ -11,7 +11,7 @@ function _civicrm_api3_bemaswebsite_Createorder_spec(&$spec) {
 }
 
 function civicrm_api3_bemaswebsite_Createorder($params) {
-  $contact = new CRM_Websiteapi_Order();
-  $contact->createOrder($params);
+  $order = new CRM_Websiteapi_Order();
+  $order->createOrder($params);
   return civicrm_api3_create_success('OK', $params, 'Bemaswebsite', 'Createorder');
 }
