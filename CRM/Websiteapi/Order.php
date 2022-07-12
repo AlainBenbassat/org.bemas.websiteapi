@@ -22,7 +22,7 @@ class CRM_Websiteapi_Order {
   }
 
   private function getOrderHeader($apiParams) {
-    $fields = ['order_id', 'contact_id', 'order_date', 'order_status'];
+    $fields = ['order_id', 'contact_id', 'order_date', 'order_status', 'coupons', 'total_amount', 'order_items_amount'];
     $orderHeader = [];
     foreach ($fields as $field) {
       $orderHeader[$field] = $apiParams[$field];
