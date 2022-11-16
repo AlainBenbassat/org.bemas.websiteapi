@@ -172,6 +172,7 @@ class CRM_Websiteapi_OrderValidator {
   }
 
   private function validateEventRegistrationDate($orderDate, $event) {
+return;
     if ($orderDate < $event->registration_start_date || $orderDate > $event->registration_end_date) {
       throw new Exception("Order date is outside event registration date");
     }

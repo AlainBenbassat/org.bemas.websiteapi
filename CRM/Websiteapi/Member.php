@@ -36,11 +36,11 @@ class CRM_Websiteapi_Member {
       and
         c.contact_type = 'Organization'
       and
-        m.status_id = 2 or (
+        (m.status_id = 2 or (
           m.start_date <= %1
         and
           m.end_date >= %2
-        )
+        ))
       and
         m.owner_membership_id is null
       order by
