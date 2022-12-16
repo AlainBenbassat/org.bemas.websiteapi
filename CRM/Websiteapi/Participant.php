@@ -54,6 +54,8 @@ class CRM_Websiteapi_Participant {
         civicrm_participant_status_type_$languageCode s on p.status_id = s.id
       where
         p.contact_id = %1
+      and
+        s.class = 'Positive'
       order by
         e.start_date desc
       limit
