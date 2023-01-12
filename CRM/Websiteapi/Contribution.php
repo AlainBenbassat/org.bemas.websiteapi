@@ -8,7 +8,7 @@ class CRM_Websiteapi_Contribution {
 
   public function createDefaultPurchase($orderHeader, $product) {
     $params = [
-      'source' => 'OrderID:' . $orderHeader['order_id'],
+      'source' => 'https://www.bemas.org/nl/admin/commerce/orders/' . $orderHeader['order_id'],
       'financial_type_id' => self::CONTRIBUTION_FINANCIAL_TYPE_PRODUCT,
       'contact_id' => $orderHeader['contact_id'],
       'receive_date' => $orderHeader['order_date'],
@@ -33,7 +33,7 @@ class CRM_Websiteapi_Contribution {
 
   public function createParticipantPayment($orderHeader, $product, $contactId, $participantId) {
     $params = [
-      'source' => 'OrderID:' . $orderHeader['order_id'],
+      'source' => 'https://www.bemas.org/nl/admin/commerce/orders/' . $orderHeader['order_id'],
       'financial_type_id' => self::CONTRIBUTION_FINANCIAL_TYPE_EVENT,
       'contact_id' => $contactId,
       'receive_date' => $orderHeader['order_date'],
