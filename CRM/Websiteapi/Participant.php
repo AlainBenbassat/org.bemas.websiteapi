@@ -164,7 +164,7 @@ class CRM_Websiteapi_Participant {
       'contact_id' => $contactId,
       'event_id' => $eventId,
       'source' => 'OrderId:' . $orderHeader['order_id'],
-      'fee_amount' => $product->total_amount,
+      'fee_amount' => $product->unit_price,
       'status_id' => 1, // registered
       'role_id' => 1,
     ];
