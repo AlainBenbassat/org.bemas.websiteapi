@@ -1,6 +1,7 @@
 <?php
 
 class CRM_Websiteapi_Order {
+  private $logOrder = FALSE; // set to TRUE to log the order in ConfigAndLog
   private $orderValidator;
   private $orderActivity;
 
@@ -10,6 +11,10 @@ class CRM_Websiteapi_Order {
   }
 
   public function createOrder($apiParams) {
+    if ($this->logOrder) {
+      Civi::log()->debug(print_r($apiParams, TRUE));
+    }
+
     $this->orderValidator->validateOrderHeader($apiParams);
 
     $orderHeader = $this->getOrderHeader($apiParams);
