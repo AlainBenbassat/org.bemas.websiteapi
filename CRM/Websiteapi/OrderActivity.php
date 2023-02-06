@@ -6,6 +6,7 @@ class CRM_Websiteapi_OrderActivity {
   private const CUSTOM_FIELD_ID_COUPONS = 178;
   private const CUSTOM_FIELD_ID_TOTAL_WITHOUT_DISCOUNT = 179;
   private const CUSTOM_FIELD_ID_TOTAL_WITH_DISCOUNT = 180;
+  private const CUSTOM_FIELD_ID_ORDER_ID = 185;
 
   public function create($orderHeader, $products) {
     civicrm_api3('Activity', 'create', [
@@ -17,6 +18,7 @@ class CRM_Websiteapi_OrderActivity {
       'custom_' . self::CUSTOM_FIELD_ID_COUPONS => $this->listCoupons($orderHeader),
       'custom_' . self::CUSTOM_FIELD_ID_TOTAL_WITH_DISCOUNT => $orderHeader['total_amount'],
       'custom_' . self::CUSTOM_FIELD_ID_TOTAL_WITHOUT_DISCOUNT => $orderHeader['order_items_amount'],
+      'custom_' . self::CUSTOM_FIELD_ID_ORDER_ID => $orderHeader['order_id'],
     ]);
   }
 
