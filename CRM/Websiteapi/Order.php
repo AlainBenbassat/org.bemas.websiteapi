@@ -26,11 +26,23 @@ class CRM_Websiteapi_Order {
     $this->orderActivity->create($orderHeader, $products);
   }
 
+  public static function getOrderUrl($orderId) {
+    return "https://www.bemas.org/nl/admin/commerce/orders/$orderId";
+  }
+
   private function getOrderHeader($apiParams) {
-    $fields = ['order_id', 'contact_id', 'order_date', 'order_status', 'coupons', 'total_amount', 'order_items_amount'];
     $orderHeader = [];
-    foreach ($fields as $field) {
+
+    $expectedFields = ['order_id', 'contact_id', 'order_date', 'order_status', 'total_amount', 'order_items_amount'];
+    foreach ($expectedFields as $field) {
       $orderHeader[$field] = $apiParams[$field];
+    }
+
+    $optionalFields = ['coupons'];
+    foreach ($optionalFields as $field) {
+      if (!empty($apiParams[$field])) {
+        $orderHeader[$field] = $apiParams[$field];
+      }
     }
 
     return $orderHeader;
@@ -63,7 +75,8 @@ class CRM_Websiteapi_Order {
         $registeredContactIds[] = $part->createEventRegistration($orderHeader, $product, $participant);
       }
 
-      $part->fillRegisteredBy($product->product_id, $orderHeader['contact_id'], $registeredContactIds);
+      // Uncomment the following when we have sorted out how to deal with the training responsible
+      //$part->fillRegisteredBy($product->product_id, $orderHeader['contact_id'], $registeredContactIds);
     }
   }
 

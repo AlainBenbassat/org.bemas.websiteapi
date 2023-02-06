@@ -109,17 +109,24 @@ class CRM_Websiteapi_Participant {
   }
 
   private function getParticipantId($eventId, $contactId) {
-    $participant = civicrm_api3('Participant', 'getsingle', [
-      'contact_id' => $contactId,
-      'event_id' => $eventId,
-    ]);
+    try {
+      $participant = civicrm_api3('Participant', 'getsingle', [
+        'contact_id' => $contactId,
+        'event_id' => $eventId,
+      ]);
 
-    return $participant['id'];
+      return $participant['id'];
+    }
+    catch (Exception $e) {
+      return 0;
+    }
   }
 
   private function setRegisterBy($mainContactParticipantId, $participantId) {
-    $sql = "update civicrm_participant set registered_by_id = $mainContactParticipantId where id = $participantId";
-    CRM_Core_DAO::executeQuery($sql);
+    if ($mainContactParticipantId > 0) {
+      $sql = "update civicrm_participant set registered_by_id = $mainContactParticipantId where id = $participantId";
+      CRM_Core_DAO::executeQuery($sql);
+    }
   }
 
   private function registerAsTrainingResponsible($eventId, $contactId) {
@@ -163,7 +170,7 @@ class CRM_Websiteapi_Participant {
       'registration_date' => $orderHeader['order_date'],
       'contact_id' => $contactId,
       'event_id' => $eventId,
-      'source' => 'OrderId:' . $orderHeader['order_id'],
+      'source' => CRM_Websiteapi_Order::getOrderUrl($orderHeader['order_id']),
       'fee_amount' => $product->unit_price,
       'status_id' => 1, // registered
       'role_id' => 1,

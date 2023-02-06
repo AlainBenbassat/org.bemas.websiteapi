@@ -30,7 +30,7 @@ class CRM_Websiteapi_OrderValidator {
     $event = $this->getEventById($eventId);
 
     $this->validateEventExists($eventId, $event);
-    $this->validateEventRegistrationDate($orderDate, $event);
+    //$this->validateEventRegistrationDate($orderDate, $event);
   }
 
   public function validateParticipants($decodedParticipants) {
@@ -64,7 +64,7 @@ class CRM_Websiteapi_OrderValidator {
   }
 
   private function validateContactIsNotDeleted($contactId, $contact) {
-    if ($contact['is_deleted'] == 1) {
+    if (!empty($contact['is_deleted'])) {
       throw new Exception('Contact with id = ' . $contactId . ' is deleted');
     }
   }
@@ -172,7 +172,6 @@ class CRM_Websiteapi_OrderValidator {
   }
 
   private function validateEventRegistrationDate($orderDate, $event) {
-return;
     if ($orderDate < $event->registration_start_date || $orderDate > $event->registration_end_date) {
       throw new Exception("Order date is outside event registration date");
     }

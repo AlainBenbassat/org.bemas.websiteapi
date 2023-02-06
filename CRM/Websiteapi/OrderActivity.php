@@ -11,7 +11,7 @@ class CRM_Websiteapi_OrderActivity {
     civicrm_api3('Activity', 'create', [
       'source_contact_id' => $orderHeader['contact_id'],
       'activity_type_id' => self::ACTIVITY_TYPE_ID_ORDER,
-      'subject' => 'Bestelling nr. ' . $orderHeader['order_id'],
+      'subject' => CRM_Websiteapi_Order::getOrderUrl($orderHeader['order_id']),
       'status_id' => 'Completed',
       'custom_' . self::CUSTOM_FIELD_ID_HAS_COUPON => $this->hasCoupons($orderHeader),
       'custom_' . self::CUSTOM_FIELD_ID_COUPONS => $this->listCoupons($orderHeader),

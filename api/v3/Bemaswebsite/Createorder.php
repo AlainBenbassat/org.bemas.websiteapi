@@ -11,7 +11,14 @@ function _civicrm_api3_bemaswebsite_Createorder_spec(&$spec) {
 }
 
 function civicrm_api3_bemaswebsite_Createorder($params) {
-  $order = new CRM_Websiteapi_Order();
-  $order->createOrder($params);
-  return civicrm_api3_create_success('OK', $params, 'Bemaswebsite', 'Createorder');
+  try {
+    $order = new CRM_Websiteapi_Order();
+    $order->createOrder($params);
+    return civicrm_api3_create_success('OK', $params, 'Bemaswebsite', 'Createorder');
+  }
+  catch (Exception $e) {
+    Civi::log()->error($e->getMessage());
+
+    throw new API_Exception($e->getMessage(), 999);
+  }
 }
