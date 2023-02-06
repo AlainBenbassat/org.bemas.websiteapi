@@ -16,6 +16,9 @@ class CRM_Websiteapi_Participant {
         $this->saveRegistrationNotes($participantId, $product->notes);
       }
     }
+    else {
+      $this->reactivateCancelledParticipant($contactId, $eventId);
+    }
 
     return $contactId;
   }
@@ -162,6 +165,22 @@ class CRM_Websiteapi_Participant {
     else {
       return FALSE;
     }
+  }
+
+  private function reactivateCancelledParticipant($contactId, $eventId) {
+    $sql = "
+      update
+        civicrm_participant
+      set
+        status_id = 1
+      where
+        status_id = 4
+      and
+        contact_id = $contactId
+      and
+        event_id = $eventId
+    ";
+    CRM_Core_DAO::singleValueQuery($sql);
   }
 
   private function saveEventRegistration($orderHeader, $product, $contactId, $eventId) {
