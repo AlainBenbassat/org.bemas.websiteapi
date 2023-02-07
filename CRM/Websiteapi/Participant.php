@@ -1,12 +1,17 @@
 <?php
 
 class CRM_Websiteapi_Participant {
+  private const CUSTOM_FIELD_ID_DIET = 130;
+  private const CUSTOM_FIELD_ID_SHARE_MY_DATA = 168;
+
   public function createEventRegistration($orderHeader, $product, $participant) {
     $contactId = $this->getContactId($participant);
+    $this->createOrUpdatePhone($contactId, $participant->telephone);
+
     $eventId = $product->product_id;
 
     if (!$this->isRegistered($contactId, $eventId)) {
-      $participantId = $this->saveEventRegistration($orderHeader, $product, $contactId, $eventId);
+      $participantId = $this->saveEventRegistration($orderHeader, $product, $contactId, $eventId, $participant->diet, $participant->notes);
 
       if ($product->unit_price > 0) {
         $this->saveEventPayment($orderHeader, $product, $contactId, $eventId, $participantId);
@@ -183,7 +188,7 @@ class CRM_Websiteapi_Participant {
     CRM_Core_DAO::singleValueQuery($sql);
   }
 
-  private function saveEventRegistration($orderHeader, $product, $contactId, $eventId) {
+  private function saveEventRegistration($orderHeader, $product, $contactId, $eventId, $diet, $notes) {
     $params = [
       'sequential' => 1,
       'registration_date' => $orderHeader['order_date'],
@@ -193,11 +198,29 @@ class CRM_Websiteapi_Participant {
       'fee_amount' => $product->unit_price,
       'status_id' => 1, // registered
       'role_id' => 1,
+      'custom_' . self::CUSTOM_FIELD_ID_SHARE_MY_DATA => 1,
+      'custom_' . self::CUSTOM_FIELD_ID_DIET => $diet,
     ];
 
     $participant = civicrm_api3('Participant', 'create', $params);
+    $participantId = $participant['values'][0]['id'];
 
-    return $participant['values'][0]['id'];
+    if ($notes) {
+      $this->saveEventRegistrationNotes($contactId, $participantId, $notes);
+    }
+
+    return $participantId;
+  }
+
+  private function saveEventRegistrationNotes($contactId, $participantId, $notes) {
+    $params = [
+      'entity_table' => 'civicrm_participant',
+      'entity_id' => $participantId,
+      'note' => $notes,
+      'contact_id' => $contactId,
+    ];
+
+    civicrm_api3('Note', 'create', $params);
   }
 
   private function saveEventPayment($orderHeader, $product, $contactId, $eventId, $participantId) {
@@ -222,6 +245,57 @@ class CRM_Websiteapi_Participant {
       'note' => $notes,
     ];
     civicrm_api3('Note', 'create', $params);
+  }
+
+  private function createOrUpdatePhone($contactId, $phone) {
+    if ($phone) {
+      if ($this->hasRegistrationPhone($contactId)) {
+        $this->updateRegistrationPhone($contactId, $phone);
+      }
+      else {
+        $this->createRegistrationPhone($contactId, $phone);
+      }
+    }
+  }
+
+  private function hasRegistrationPhone($contactId) {
+    $phoneId = CRM_Core_DAO::singleValueQuery("select id from civicrm_phone where location_type_id = 3 and phone_type_id = 6 and contact_id = $contactId");
+    if ($phoneId) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  private function updateRegistrationPhone($contactId, $phone) {
+    $sql = "
+      update
+        civicrm_phone
+      set
+        phone = %1
+      where
+        location_type_id = 3
+      and
+        phone_type_id = 6
+      and
+        contact_id = $contactId
+    ";
+    $sqlParams = [
+      1 => [$phone, 'String'],
+    ];
+    CRM_Core_DAO::executeQuery($sql, $sqlParams);
+  }
+
+  private function createRegistrationPhone($contactId, $phone) {
+    $params = [
+      'sequential' => 1,
+      'phone' => $phone,
+      'contact_id' => $contactId,
+      'location_type_id' => 3,
+      'phone_type_id' => 6,
+    ];
+    $result = civicrm_api3('Phone', 'create', $params);
   }
 
   private function getLanguagePrefix($language) {
