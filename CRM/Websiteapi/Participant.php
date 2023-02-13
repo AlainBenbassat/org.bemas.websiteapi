@@ -3,6 +3,8 @@
 class CRM_Websiteapi_Participant {
   private const CUSTOM_FIELD_ID_DIET = 130;
   private const CUSTOM_FIELD_ID_SHARE_MY_DATA = 168;
+  private const CUSTOM_FIELD_ID_EMPLOYER = 186;
+  private const CUSTOM_FIELD_ID_JOB_TITLE = 187;
 
   public function createEventRegistration($orderHeader, $product, $participant) {
     $contactId = $this->getContactId($participant);
@@ -11,7 +13,7 @@ class CRM_Websiteapi_Participant {
     $eventId = $product->product_id;
 
     if (!$this->isRegistered($contactId, $eventId)) {
-      $participantId = $this->saveEventRegistration($orderHeader, $product, $contactId, $eventId, $participant->diet, $participant->notes);
+      $participantId = $this->saveEventRegistration($orderHeader, $product, $contactId, $eventId, $participant->current_employer, $participant->function, $participant->diet, $participant->notes);
 
       if ($product->unit_price > 0) {
         $this->saveEventPayment($orderHeader, $product, $contactId, $eventId, $participantId);
@@ -188,7 +190,7 @@ class CRM_Websiteapi_Participant {
     CRM_Core_DAO::singleValueQuery($sql);
   }
 
-  private function saveEventRegistration($orderHeader, $product, $contactId, $eventId, $diet, $notes) {
+  private function saveEventRegistration($orderHeader, $product, $contactId, $eventId, $currentEmployer, $jobTitle, $diet, $notes) {
     $params = [
       'sequential' => 1,
       'registration_date' => $orderHeader['order_date'],
@@ -200,6 +202,8 @@ class CRM_Websiteapi_Participant {
       'role_id' => 1,
       'custom_' . self::CUSTOM_FIELD_ID_SHARE_MY_DATA => 1,
       'custom_' . self::CUSTOM_FIELD_ID_DIET => $diet,
+      'custom_' . self::CUSTOM_FIELD_ID_EMPLOYER => $currentEmployer,
+      'custom_' . self::CUSTOM_FIELD_ID_JOB_TITLE => $jobTitle,
     ];
 
     $participant = civicrm_api3('Participant', 'create', $params);
