@@ -1,7 +1,7 @@
 <?php
 
 class CRM_Websiteapi_Order {
-  private $logOrder = FALSE; // set to TRUE to log the order in ConfigAndLog
+  private $logOrder = TRUE; // set to TRUE to log the order in ConfigAndLog
   private $orderValidator;
   private $orderActivity;
 
