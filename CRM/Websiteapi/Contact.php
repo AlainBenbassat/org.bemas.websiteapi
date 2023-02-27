@@ -13,6 +13,8 @@ class CRM_Websiteapi_Contact {
         e.email = %1
       and
         c.is_deleted = 0
+      and
+        c.contact_type = 'Individual'
       order by
         c.id
     ";
