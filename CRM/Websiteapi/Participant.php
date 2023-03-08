@@ -5,22 +5,25 @@ class CRM_Websiteapi_Participant {
   private const CUSTOM_FIELD_ID_SHARE_MY_DATA = 168;
   private const CUSTOM_FIELD_ID_EMPLOYER = 186;
   private const CUSTOM_FIELD_ID_JOB_TITLE = 187;
+  private const CUSTOM_FIELD_ID_COUPON = 188;
 
-  public function createEventRegistration($orderHeader, $product, $participant) {
+  public function createEventRegistration($participantCounter, $orderHeader, $product, $participant) {
     $contactId = $this->getContactId($participant);
     $this->createOrUpdatePhone($contactId, $participant->telephone);
 
     $eventId = $product->product_id;
 
     if (!$this->isRegistered($contactId, $eventId)) {
-      $participantId = $this->saveEventRegistration($orderHeader, $product, $contactId, $eventId, $participant->current_employer, $participant->function, $participant->diet, $participant->notes);
+      [$unitPriceWithDiscount, $discountCode] = $this->calculateParticipantPrice($participantCounter, $orderHeader, $product);
 
-      if ($product->unit_price > 0) {
-        $this->saveEventPayment($orderHeader, $product, $contactId, $eventId, $participantId);
+      $participantId = $this->saveEventRegistration($orderHeader, $product, $contactId, $eventId, $participant, $unitPriceWithDiscount, $discountCode);
+
+      if ($unitPriceWithDiscount > 0) {
+        $this->saveEventPayment($orderHeader, $product, $contactId, $participantId, $unitPriceWithDiscount, $discountCode);
       }
 
-      if (!empty($product->notes)) {
-        $this->saveRegistrationNotes($participantId, $product->notes);
+      if (!empty($participant->notes)) {
+        $this->saveEventRegistrationNotes($contactId, $participantId, $participant->notes);
       }
     }
     else {
@@ -118,6 +121,32 @@ class CRM_Websiteapi_Participant {
     }
   }
 
+  private function calculateParticipantPrice($participantCounter, $orderHeader, $product) {
+    // default is: no discount
+    $unitPriceWithDiscount = $product->unit_price;
+    $discountCode = '';
+
+    // only the first participant *might* get a discount
+    if ($participantCounter == 1 && $this->isDiscountedProduct($product)) {
+      $unitPriceWithDiscount = $product->unit_price + $product->adjustments['amount'];
+      $discountCode = $orderHeader['coupons'];
+    }
+
+    return [$unitPriceWithDiscount, $discountCode];
+  }
+
+  private function isDiscountedProduct($product) {
+    if (!empty($product->adjustments)) {
+      if (!empty($product->adjustments['type']) && $product->adjustments['type'] == 'promotion') {
+        if (!empty($product->adjustments['amount']) && is_numeric($product->adjustments['amount'])) {
+          return TRUE;
+        }
+      }
+    }
+
+    return FALSE;
+  }
+
   private function getParticipantId($eventId, $contactId) {
     try {
       $participant = civicrm_api3('Participant', 'getsingle', [
@@ -190,28 +219,25 @@ class CRM_Websiteapi_Participant {
     CRM_Core_DAO::singleValueQuery($sql);
   }
 
-  private function saveEventRegistration($orderHeader, $product, $contactId, $eventId, $currentEmployer, $jobTitle, $diet, $notes) {
+  private function saveEventRegistration($orderHeader, $product, $contactId, $eventId, $participant, $unitPriceWithDiscount, $discountCode) {
     $params = [
       'sequential' => 1,
       'registration_date' => $orderHeader['order_date'],
       'contact_id' => $contactId,
       'event_id' => $eventId,
       'source' => CRM_Websiteapi_Order::getOrderUrl($orderHeader['order_id']),
-      'fee_amount' => $product->unit_price,
+      'fee_amount' => $unitPriceWithDiscount,
       'status_id' => 1, // registered
       'role_id' => 1,
       'custom_' . self::CUSTOM_FIELD_ID_SHARE_MY_DATA => 1,
-      'custom_' . self::CUSTOM_FIELD_ID_DIET => $diet,
-      'custom_' . self::CUSTOM_FIELD_ID_EMPLOYER => $currentEmployer,
-      'custom_' . self::CUSTOM_FIELD_ID_JOB_TITLE => $jobTitle,
+      'custom_' . self::CUSTOM_FIELD_ID_DIET => $participant->diet,
+      'custom_' . self::CUSTOM_FIELD_ID_EMPLOYER => $participant->current_employer,
+      'custom_' . self::CUSTOM_FIELD_ID_JOB_TITLE => $participant->function,
+      'custom_' . self::CUSTOM_FIELD_ID_COUPON => $discountCode,
     ];
 
     $participant = civicrm_api3('Participant', 'create', $params);
     $participantId = $participant['values'][0]['id'];
-
-    if ($notes) {
-      $this->saveEventRegistrationNotes($contactId, $participantId, $notes);
-    }
 
     return $participantId;
   }
@@ -227,9 +253,9 @@ class CRM_Websiteapi_Participant {
     civicrm_api3('Note', 'create', $params);
   }
 
-  private function saveEventPayment($orderHeader, $product, $contactId, $eventId, $participantId) {
+  private function saveEventPayment($orderHeader, $contactId, $participantId, $unitPriceWithDiscount, $discountCode) {
     $contrib = new CRM_Websiteapi_Contribution();
-    $contribId = $contrib->createParticipantPayment($orderHeader, $product, $contactId, $participantId);
+    $contribId = $contrib->createParticipantPayment($orderHeader, $contactId, $unitPriceWithDiscount, $discountCode);
 
     $this->linkContributionToParticipant($contribId, $participantId);
   }
@@ -240,15 +266,6 @@ class CRM_Websiteapi_Participant {
       'contribution_id' => $contributionId,
     ];
     civicrm_api3('ParticipantPayment', 'create', $params);
-  }
-
-  private function saveRegistrationNotes($participantId, $notes) {
-    $params = [
-      'entity_table' => 'civicrm_participant',
-      'entity_id' => $participantId,
-      'note' => $notes,
-    ];
-    civicrm_api3('Note', 'create', $params);
   }
 
   private function createOrUpdatePhone($contactId, $phone) {

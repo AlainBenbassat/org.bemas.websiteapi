@@ -31,13 +31,13 @@ class CRM_Websiteapi_Contribution {
     return $contrib['values'][0]['id'];
   }
 
-  public function createParticipantPayment($orderHeader, $product, $contactId, $participantId) {
+  public function createParticipantPayment($orderHeader, $contactId, $unitPriceWithDiscount, $discountCode) {
     $params = [
       'source' => CRM_Websiteapi_Order::getOrderUrl($orderHeader['order_id']),
       'financial_type_id' => self::CONTRIBUTION_FINANCIAL_TYPE_EVENT,
       'contact_id' => $contactId,
       'receive_date' => $orderHeader['order_date'],
-      'total_amount' => $product->unit_price,
+      'total_amount' => $unitPriceWithDiscount,
       'is_pay_later' => $this->getIsPayLaterFromOrderStatus($orderHeader['order_status']),
       'contribution_status_id' => $this->getContributionStatusFromOrderStatus($orderHeader['order_status']),
       'payment_instrument' => 'EFT',

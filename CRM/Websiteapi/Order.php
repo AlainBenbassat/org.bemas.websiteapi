@@ -23,7 +23,7 @@ class CRM_Websiteapi_Order {
       $this->saveProduct($orderHeader, $product);
     }
 
-    $this->orderActivity->create($orderHeader, $products);
+    $this->orderActivity->create($orderHeader);
   }
 
   public static function getOrderUrl($orderId) {
@@ -38,14 +38,46 @@ class CRM_Websiteapi_Order {
       $orderHeader[$field] = $apiParams[$field];
     }
 
-    $optionalFields = ['coupons'];
-    foreach ($optionalFields as $field) {
-      if (!empty($apiParams[$field])) {
-        $orderHeader[$field] = $apiParams[$field];
+    $orderHeader['coupons'] = $this->extractCoupons($apiParams);
+
+    return $orderHeader;
+  }
+
+  private function extractCoupons($apiParams) {
+    if ($this->hasCoupons($apiParams)) {
+      return $this->getCouponsAsString($apiParams);
+    }
+    else {
+      return '';
+    }
+  }
+
+  private function hasCoupons($apiParams) {
+    if (!empty($apiParams['coupons']) && count($apiParams['coupons']) > 0) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  private function getCouponsAsString($apiParams) {
+    $couponList = '';
+
+    foreach ($apiParams['coupons'] as $coupon) {
+      if ($couponList) {
+        $couponList .= ', ';
+      }
+
+      if ($coupon['admin_name'] == $coupon['code']) {
+        $couponList .= $coupon['admin_name'];
+      }
+      else {
+        $couponList .= $coupon['admin_name'] . ' (' . $coupon['code'] . ')';
       }
     }
 
-    return $orderHeader;
+    return $couponList;
   }
 
   private function decodeProducts($jsonProducts) {
@@ -68,11 +100,14 @@ class CRM_Websiteapi_Order {
       $this->orderValidator->validateParticipants($product->participants);
 
       $registeredContactIds = [];
+      $participantCounter = 1;
       foreach ($product->participants as $participant) {
         $this->orderValidator->validateParticipant($participant);
 
         $part = new CRM_Websiteapi_Participant();
-        $registeredContactIds[] = $part->createEventRegistration($orderHeader, $product, $participant);
+        $registeredContactIds[] = $part->createEventRegistration($participantCounter, $orderHeader, $product, $participant);
+
+        $participantCounter++;
       }
 
       // Uncomment the following when we have sorted out how to deal with the training responsible
