@@ -18,6 +18,7 @@ function civicrm_api3_bemaswebsite_Createorder($params) {
   }
   catch (Exception $e) {
     Civi::log()->error($e->getMessage());
+    Civi::log()->error(print_r($e->getTrace(), TRUE));
 
     throw new API_Exception($e->getMessage(), 999);
   }

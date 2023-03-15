@@ -19,7 +19,7 @@ class CRM_Websiteapi_Participant {
       $participantId = $this->saveEventRegistration($orderHeader, $product, $contactId, $eventId, $participant, $unitPriceWithDiscount, $discountCode);
 
       if ($unitPriceWithDiscount > 0) {
-        $this->saveEventPayment($orderHeader, $product, $contactId, $participantId, $unitPriceWithDiscount, $discountCode);
+        $this->saveEventPayment($orderHeader, $contactId, $participantId, $unitPriceWithDiscount, $discountCode);
       }
 
       if (!empty($participant->notes)) {
