@@ -31,9 +31,14 @@ class CRM_Websiteapi_Contribution {
     return $contrib['values'][0]['id'];
   }
 
-  public function createParticipantPayment($orderHeader, $contactId, $unitPriceWithDiscount, $discountCode) {
+  public function createParticipantPayment($orderHeader, $product, $contactId, $unitPriceWithDiscount, $discountCode) {
+    $source = CRM_Websiteapi_Order::getOrderUrl($orderHeader['order_id']);
+    if (property_exists($product, 'product_sku')) {
+      $source = $product->product_sku . ' - ' . $source;
+    }
+
     $params = [
-      'source' => CRM_Websiteapi_Order::getOrderUrl($orderHeader['order_id']),
+      'source' => $source,
       'financial_type_id' => self::CONTRIBUTION_FINANCIAL_TYPE_EVENT,
       'contact_id' => $contactId,
       'receive_date' => $orderHeader['order_date'],

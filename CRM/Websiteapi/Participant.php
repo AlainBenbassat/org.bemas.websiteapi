@@ -19,7 +19,7 @@ class CRM_Websiteapi_Participant {
       $participantId = $this->saveEventRegistration($orderHeader, $product, $contactId, $eventId, $participant, $unitPriceWithDiscount, $discountCode);
 
       if ($unitPriceWithDiscount > 0) {
-        $this->saveEventPayment($orderHeader, $contactId, $participantId, $unitPriceWithDiscount, $discountCode);
+        $this->saveEventPayment($orderHeader, $product, $contactId, $participantId, $unitPriceWithDiscount, $discountCode);
       }
 
       if (!empty($participant->notes)) {
@@ -253,9 +253,9 @@ class CRM_Websiteapi_Participant {
     civicrm_api3('Note', 'create', $params);
   }
 
-  private function saveEventPayment($orderHeader, $contactId, $participantId, $unitPriceWithDiscount, $discountCode) {
+  private function saveEventPayment($orderHeader, $product, $contactId, $participantId, $unitPriceWithDiscount, $discountCode) {
     $contrib = new CRM_Websiteapi_Contribution();
-    $contribId = $contrib->createParticipantPayment($orderHeader, $contactId, $unitPriceWithDiscount, $discountCode);
+    $contribId = $contrib->createParticipantPayment($orderHeader, $product, $contactId, $unitPriceWithDiscount, $discountCode);
 
     $this->linkContributionToParticipant($contribId, $participantId);
   }
