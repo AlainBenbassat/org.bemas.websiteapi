@@ -126,25 +126,13 @@ class CRM_Websiteapi_Participant {
     $unitPriceWithDiscount = $product->unit_price;
     $discountCode = '';
 
-    // only the first participant *might* get a discount
-    if ($participantCounter == 1 && $this->isDiscountedProduct($product)) {
-      $unitPriceWithDiscount = $product->unit_price + $product->adjustments['amount'];
+    // see if we have a discount for this participant
+    if (count($product->adjustments) > 0 && isset($product->adjustments[$participantCounter])) {
+      $unitPriceWithDiscount = $product->unit_price + $product->adjustments[$participantCounter];
       $discountCode = $orderHeader['coupons'];
     }
 
     return [$unitPriceWithDiscount, $discountCode];
-  }
-
-  private function isDiscountedProduct($product) {
-    if (!empty($product->adjustments)) {
-      if (!empty($product->adjustments['type']) && $product->adjustments['type'] == 'promotion') {
-        if (!empty($product->adjustments['amount']) && is_numeric($product->adjustments['amount'])) {
-          return TRUE;
-        }
-      }
-    }
-
-    return FALSE;
   }
 
   private function getParticipantId($eventId, $contactId) {

@@ -100,7 +100,7 @@ class CRM_Websiteapi_Order {
       $this->orderValidator->validateParticipants($product->participants);
 
       $registeredContactIds = [];
-      $participantCounter = 1;
+      $participantCounter = 0;
       foreach ($product->participants as $participant) {
         $this->orderValidator->validateParticipant($participant);
 
