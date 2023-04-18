@@ -127,7 +127,7 @@ class CRM_Websiteapi_Participant {
     $discountCode = '';
 
     // see if we have a discount for this participant
-    if (count($product->adjustments) > 0 && isset($product->adjustments[$participantCounter])) {
+    if (!empty($product->adjustments[$participantCounter])) {
       $unitPriceWithDiscount = $product->unit_price + $product->adjustments[$participantCounter];
       $discountCode = $orderHeader['coupons'];
     }
