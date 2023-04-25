@@ -9,7 +9,7 @@ class CRM_Websiteapi_Participant {
 
   public function createEventRegistration($participantCounter, $orderHeader, $product, $participant) {
     $contactId = $this->getContactId($participant);
-    $this->createOrUpdatePhone($contactId, $participant->telephone);
+    $this->createOrUpdatePhone($contactId, $participant['telephone']);
 
     $eventId = $product['product_id'];
 
@@ -22,8 +22,8 @@ class CRM_Websiteapi_Participant {
         $this->saveEventPayment($orderHeader, $product, $contactId, $participantId, $unitPriceWithDiscount, $discountCode);
       }
 
-      if (!empty($participant->notes)) {
-        $this->saveEventRegistrationNotes($contactId, $participantId, $participant->notes);
+      if (!empty($participant['notes'])) {
+        $this->saveEventRegistrationNotes($contactId, $participantId, $participant['notes']);
       }
     }
     else {
@@ -170,9 +170,9 @@ class CRM_Websiteapi_Participant {
   private function getContactId($participant) {
     $params = [
       'sequential' => 1,
-      'first_name' => $participant->first_name,
-      'last_name' => $participant->last_name,
-      'email' => $participant->email,
+      'first_name' => $participant['first_name'],
+      'last_name' => $participant['last_name'],
+      'email' => $participant['email'],
       'contact_type' => 'Individual',
       'location_type_id' => 3,
     ];
@@ -218,9 +218,9 @@ class CRM_Websiteapi_Participant {
       'status_id' => 1, // registered
       'role_id' => 1,
       'custom_' . self::CUSTOM_FIELD_ID_SHARE_MY_DATA => 1,
-      'custom_' . self::CUSTOM_FIELD_ID_DIET => $participant->diet,
-      'custom_' . self::CUSTOM_FIELD_ID_EMPLOYER => $participant->current_employer,
-      'custom_' . self::CUSTOM_FIELD_ID_JOB_TITLE => $participant->function,
+      'custom_' . self::CUSTOM_FIELD_ID_DIET => $participant['diet'],
+      'custom_' . self::CUSTOM_FIELD_ID_EMPLOYER => $participant['current_employer'],
+      'custom_' . self::CUSTOM_FIELD_ID_JOB_TITLE => $participant['function'],
       'custom_' . self::CUSTOM_FIELD_ID_COUPON => $discountCode,
     ];
 

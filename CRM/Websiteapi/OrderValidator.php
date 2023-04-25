@@ -129,19 +129,19 @@ class CRM_Websiteapi_OrderValidator {
   }
 
   private function validateParticipantEmail($participant) {
-    if (empty($participant->email)) {
+    if (empty($participant['email'])) {
       throw new Exception('Participant should have a field email');
     }
   }
 
   private function validateParticipantFirstName($participant) {
-    if (empty($participant->first_name)) {
+    if (empty($participant['first_name'])) {
       throw new Exception('Participant should have a field first_name');
     }
   }
 
   private function validateParticipantLastName($participant) {
-    if (empty($participant->last_name)) {
+    if (empty($participant['last_name'])) {
       throw new Exception('Participant should have a field last_name');
     }
   }
