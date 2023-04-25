@@ -90,12 +90,12 @@ class CRM_Websiteapi_Order {
       $contrib->createDefaultPurchase($orderHeader, $product);
     }
     elseif ($this->isProductEvent($product)) {
-      $this->orderValidator->validateEventId($product->product_id, $orderHeader['order_date']);
-      $this->orderValidator->validateParticipants($product->participants);
+      $this->orderValidator->validateEventId($product['product_id'], $orderHeader['order_date']);
+      $this->orderValidator->validateParticipants($product['participants']);
 
       $registeredContactIds = [];
       $participantCounter = 0;
-      foreach ($product->participants as $participant) {
+      foreach ($product['participants'] as $participant) {
         $this->orderValidator->validateParticipant($participant);
 
         $part = new CRM_Websiteapi_Participant();
@@ -105,12 +105,12 @@ class CRM_Websiteapi_Order {
       }
 
       // Uncomment the following when we have sorted out how to deal with the training responsible
-      //$part->fillRegisteredBy($product->product_id, $orderHeader['contact_id'], $registeredContactIds);
+      //$part->fillRegisteredBy($product['product_id'], $orderHeader['contact_id'], $registeredContactIds);
     }
   }
 
   private function isProductDefault($product) {
-    if ($product->product_type == 'default') {
+    if ($product['product_type'] == 'default') {
       return TRUE;
     }
     else {
@@ -119,7 +119,7 @@ class CRM_Websiteapi_Order {
   }
 
   private function isProductEvent($product) {
-    if ($product->product_type == 'event') {
+    if ($product['product_type'] == 'event') {
       return TRUE;
     }
     else {

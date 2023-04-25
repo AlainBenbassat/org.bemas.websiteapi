@@ -12,7 +12,7 @@ class CRM_Websiteapi_Contribution {
       'financial_type_id' => self::CONTRIBUTION_FINANCIAL_TYPE_PRODUCT,
       'contact_id' => $orderHeader['contact_id'],
       'receive_date' => $orderHeader['order_date'],
-      'total_amount' => $product->total_amount,
+      'total_amount' => $product['total_amount'],
       'is_pay_later' => $this->getIsPayLaterFromOrderStatus($orderHeader['order_status']),
       'contribution_status_id' => $this->getContributionStatusFromOrderStatus($orderHeader['order_status']),
       'payment_instrument' => 'EFT',
@@ -24,7 +24,7 @@ class CRM_Websiteapi_Contribution {
       'entity_table' => 'civicrm_contribution',
       'entity_id' => $contrib['values'][0]['id'],
       'contact_id' => $orderHeader['contact_id'],
-      'note' => $product->quantity . 'x ' . $product->product_title,
+      'note' => $product['quantity'] . 'x ' . $product['product_title'],
     ];
     $note = civicrm_api3('Note', 'create', $params);
 
@@ -34,7 +34,7 @@ class CRM_Websiteapi_Contribution {
   public function createParticipantPayment($orderHeader, $product, $contactId, $unitPriceWithDiscount, $discountCode) {
     $source = CRM_Websiteapi_Order::getOrderUrl($orderHeader['order_id']);
     if (property_exists($product, 'product_sku')) {
-      $source = $product->product_sku . ' - ' . $source;
+      $source = $product['product_sku'] . ' - ' . $source;
     }
 
     $params = [

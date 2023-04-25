@@ -72,58 +72,58 @@ class CRM_Websiteapi_OrderValidator {
   }
 
   private function validateProductType($product) {
-    if (empty($product->product_type)) {
+    if (empty($product['product_type'])) {
       throw new Exception('Product should have a field product_type');
     }
 
     $validProductTypes = ['default', 'event'];
-    if (!in_array($product->product_type, $validProductTypes)) {
+    if (!in_array($product['product_type'], $validProductTypes)) {
       throw new Exception('Product type should be: ' . implode(', ', $validProductTypes));
     }
   }
 
   private function validateProductId($product) {
-    if (empty($product->product_id)) {
+    if (empty($product['product_id'])) {
       throw new Exception('Product should have a field product_id');
     }
 
-    if (!is_numeric($product->product_id)) {
+    if (!is_numeric($product['product_id'])) {
       throw new Exception('product_id should be numeric');
     }
   }
 
   private function validateProductTitle($product) {
-    if (empty($product->product_title)) {
+    if (empty($product['product_title'])) {
       throw new Exception('Product should have a field product_title');
     }
   }
 
   private function validateProductUnitPrice($product) {
-    if (empty($product->unit_price)) {
+    if (empty($product['unit_price'])) {
       throw new Exception('Product should have a field unit_price');
     }
 
-    if (!is_numeric($product->unit_price)) {
+    if (!is_numeric($product['unit_price'])) {
       throw new Exception('unit_price should be numeric');
     }
   }
 
   private function validateProductQuantity($product) {
-    if (empty($product->quantity)) {
+    if (empty($product['quantity'])) {
       throw new Exception('Product should have a field quantity');
     }
 
-    if (!is_numeric($product->quantity)) {
+    if (!is_numeric($product['quantity'])) {
       throw new Exception('quantity should be numeric');
     }
   }
 
   private function validateProductTotalAmount($product) {
-    if (empty($product->total_amount)) {
+    if (empty($product['total_amount'])) {
       throw new Exception('Product should have a field total_amount');
     }
 
-    if (!is_numeric($product->total_amount)) {
+    if (!is_numeric($product['total_amount'])) {
       throw new Exception('total_amount should be numeric');
     }
   }

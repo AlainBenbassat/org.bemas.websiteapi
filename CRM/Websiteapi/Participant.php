@@ -11,7 +11,7 @@ class CRM_Websiteapi_Participant {
     $contactId = $this->getContactId($participant);
     $this->createOrUpdatePhone($contactId, $participant->telephone);
 
-    $eventId = $product->product_id;
+    $eventId = $product['product_id'];
 
     if (!$this->isRegistered($contactId, $eventId)) {
       [$unitPriceWithDiscount, $discountCode] = $this->calculateParticipantPrice($participantCounter, $orderHeader, $product);
@@ -123,12 +123,12 @@ class CRM_Websiteapi_Participant {
 
   private function calculateParticipantPrice($participantCounter, $orderHeader, $product) {
     // default is: no discount
-    $unitPriceWithDiscount = $product->unit_price;
+    $unitPriceWithDiscount = $product['unit_price'];
     $discountCode = '';
 
     // see if we have a discount for this participant
-    if (!empty($product->adjustments[$participantCounter])) {
-      $unitPriceWithDiscount = $product->unit_price + $product->adjustments[$participantCounter];
+    if (!empty($product['adjustments'][$participantCounter])) {
+      $unitPriceWithDiscount = $product['unit_price'] + $product['adjustments'][$participantCounter];
       $discountCode = $orderHeader['coupons'];
     }
 
