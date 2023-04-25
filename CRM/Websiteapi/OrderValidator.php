@@ -7,12 +7,8 @@ class CRM_Websiteapi_OrderValidator {
     $this->validateTotalAmount($apiParams['total_amount']);
   }
 
-  public function validateProducts($decodedProducts) {
-    if ($decodedProducts == null) {
-      throw new Exception('Cannot decode products.');
-    }
-
-    if (!is_array($decodedProducts)) {
+  public function validateProducts($products) {
+    if (!is_array($products)) {
       throw new Exception('Products should be an array.');
     }
   }
