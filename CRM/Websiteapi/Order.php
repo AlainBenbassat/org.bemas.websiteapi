@@ -43,6 +43,9 @@ class CRM_Websiteapi_Order {
     if (empty($apiParams['coupons'])) {
       $orderHeader['coupons'] = [];
     }
+    else {
+      $orderHeader['coupons'] = $apiParams['coupons'];
+    }
 
     return $orderHeader;
   }
