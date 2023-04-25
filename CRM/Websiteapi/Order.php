@@ -40,20 +40,11 @@ class CRM_Websiteapi_Order {
       $orderHeader[$field] = $apiParams[$field];
     }
 
-    if (!$this->hasCoupons($apiParams)) {
+    if (empty($apiParams['coupons'])) {
       $orderHeader['coupons'] = [];
     }
 
     return $orderHeader;
-  }
-
-  private function hasCoupons($apiParams) {
-    if (!empty($apiParams['coupons']) && count($apiParams['coupons']) > 0) {
-      return TRUE;
-    }
-    else {
-      return FALSE;
-    }
   }
 
   private function saveProduct($orderHeader, $product) {
