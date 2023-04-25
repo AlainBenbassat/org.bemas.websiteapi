@@ -16,9 +16,11 @@ class CRM_Websiteapi_Order {
     }
 
     $this->orderValidator->validateOrderHeader($apiParams);
-
     $orderHeader = $this->getOrderHeader($apiParams);
-    $products = $this->decodeProducts($apiParams['products']);
+
+    $products = $apiParams['products'];
+    $this->orderValidator->validateProducts($products);
+
     foreach ($products as $product) {
       $this->saveProduct($orderHeader, $product);
     }
@@ -78,14 +80,6 @@ class CRM_Websiteapi_Order {
     }
 
     return $couponList;
-  }
-
-  private function decodeProducts($jsonProducts) {
-    $decodedProducts = json_decode($jsonProducts);
-
-    $this->orderValidator->validateProducts($decodedProducts);
-
-    return $decodedProducts;
   }
 
   private function saveProduct($orderHeader, $product) {
