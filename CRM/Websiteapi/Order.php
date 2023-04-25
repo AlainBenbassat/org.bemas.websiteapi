@@ -40,18 +40,11 @@ class CRM_Websiteapi_Order {
       $orderHeader[$field] = $apiParams[$field];
     }
 
-    $orderHeader['coupons'] = $this->extractCoupons($apiParams);
+    if (!$this->hasCoupons($apiParams)) {
+      $orderHeader['coupons'] = [];
+    }
 
     return $orderHeader;
-  }
-
-  private function extractCoupons($apiParams) {
-    if ($this->hasCoupons($apiParams)) {
-      return $this->getCouponsAsString($apiParams);
-    }
-    else {
-      return '';
-    }
   }
 
   private function hasCoupons($apiParams) {
@@ -61,25 +54,6 @@ class CRM_Websiteapi_Order {
     else {
       return FALSE;
     }
-  }
-
-  private function getCouponsAsString($apiParams) {
-    $couponList = '';
-
-    foreach ($apiParams['coupons'] as $coupon) {
-      if ($couponList) {
-        $couponList .= ', ';
-      }
-
-      if ($coupon['admin_name'] == $coupon['code']) {
-        $couponList .= $coupon['admin_name'];
-      }
-      else {
-        $couponList .= $coupon['admin_name'] . ' (' . $coupon['code'] . ')';
-      }
-    }
-
-    return $couponList;
   }
 
   private function saveProduct($orderHeader, $product) {

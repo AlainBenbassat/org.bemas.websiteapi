@@ -127,9 +127,14 @@ class CRM_Websiteapi_Participant {
     $discountCode = '';
 
     // see if we have a discount for this participant
+    // - the discount price is in "adjustments"
+    // - the coupon is in the header of the order
     if (!empty($product['adjustments'][$participantCounter])) {
       $unitPriceWithDiscount = $product['unit_price'] + $product['adjustments'][$participantCounter];
-      $discountCode = $orderHeader['coupons'];
+
+      if (!empty($orderHeader['coupons'][$participantCounter])) {
+        $discountCode = CRM_Websiteapi_Coupon::convertCouponToString($orderHeader['coupons'][$participantCounter]);
+      }
     }
 
     return [$unitPriceWithDiscount, $discountCode];
