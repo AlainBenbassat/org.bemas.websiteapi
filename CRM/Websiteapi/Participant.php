@@ -5,7 +5,7 @@ class CRM_Websiteapi_Participant {
   private const CUSTOM_FIELD_ID_SHARE_MY_DATA = 168;
   private const CUSTOM_FIELD_ID_EMPLOYER = 186;
   private const CUSTOM_FIELD_ID_JOB_TITLE = 187;
-  private const CUSTOM_FIELD_ID_COUPON = 188;
+  private const CUSTOM_FIELD_ID_COUPON = 189;
 
   public function createEventRegistration($participantCounter, $orderHeader, $product, $participant) {
     $contactId = $this->getContactId($participant);
