@@ -33,7 +33,7 @@ class CRM_Websiteapi_Contribution {
 
   public function createParticipantPayment($orderHeader, $product, $contactId, $unitPriceWithDiscount, $discountCode) {
     $source = CRM_Websiteapi_Order::getOrderUrl($orderHeader['order_id']);
-    if (property_exists($product, 'product_sku')) {
+    if (!empty($product['product_sku'])) {
       $source = $product['product_sku'] . ' - ' . $source;
     }
 
