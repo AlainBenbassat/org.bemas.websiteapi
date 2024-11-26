@@ -1,8 +1,17 @@
 <?php
 
 class CRM_Websiteapi_OrderValidator {
-  public function validateOrderHeader($apiParams) {
-    $this->validateContact($apiParams['contact_id']);
+  public function validateOrderHeader(&$apiParams) {
+    if (empty($apiParams['contact_id'])) {
+      // anonymous user
+      $this->validatePaymentInformation($apiParams);
+      $apiParams['contact_id'] = $this->createContactFromPaymentInformation($apiParams);
+    }
+    else {
+      // logged in user
+      $this->validateContact($apiParams['contact_id']);
+    }
+
     $this->validateOrderStatus($apiParams['order_status']);
     $this->validateTotalAmount($apiParams['total_amount']);
   }
@@ -173,6 +182,18 @@ class CRM_Websiteapi_OrderValidator {
     }
   }
 
+  private function validatePaymentInformation($apiParams) {
+    if (empty($apiParams['mail'])) {
+      throw new Exception('Missing email for order without contact ID');
+    }
+    if (empty($apiParams['payment_information']['first_name'])) {
+      throw new Exception('Missing first name for order without contact ID');
+    }
+    if (empty($apiParams['payment_information']['last_name'])) {
+      throw new Exception('Missing last name for order without contact ID');
+    }
+  }
+
   private function getEventById($eventId) {
     $sql = "
       select
@@ -203,4 +224,37 @@ class CRM_Websiteapi_OrderValidator {
     }
   }
 
+  private function createContactFromPaymentInformation($apiParams) {
+    // existing contact?
+    $contact = \Civi\Api4\Contact::get(FALSE)
+      ->addSelect('id')
+      ->addJoin('Email AS email', 'INNER', ['id', '=', 'email.contact_id'], ['email.is_primary', '=', 1])
+      ->addWhere('first_name', '=', $apiParams['payment_information']['first_name'])
+      ->addWhere('last_name', '=', $apiParams['payment_information']['last_name'])
+      ->addWhere('email.email', '=', $apiParams['mail'])
+      ->addWhere('is_deleted', '=', 0)
+      ->execute()
+      ->first();
+    if ($contact) {
+      return $contact['id'];
+    }
+
+    // create new
+    $results = \Civi\Api4\Contact::create(FALSE)
+      ->addValue('first_name', $apiParams['payment_information']['first_name'])
+      ->addValue('last_name', $apiParams['payment_information']['last_name'])
+      ->addValue('contact_type', 'Individual')
+      ->execute();
+
+    $contactId = $results[0]['id'];
+
+    // add email
+    \Civi\Api4\Email::create(FALSE)
+      ->addValue('contact_id', $contactId)
+      ->addValue('location_type_id', 3)
+      ->addValue('email', $apiParams['mail'])
+      ->execute();
+
+    return $contactId;
+  }
 }
