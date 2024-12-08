@@ -92,6 +92,49 @@ class CRM_Websiteapi_Participant {
     return $registrations;
   }
 
+  public function getCertificates($contactId, $language) {
+    $certificates = [];
+
+    $languageCode = $this->getLanguagePrefix($language);
+
+    $sql = "
+      select
+        date_format(e.start_date, '%Y-%m-%d') event_start_date,
+        e.id event_id,
+        e.title event_title,
+        c.url
+      from
+        civicrm_participant p
+      inner join
+        civicrm_event_$languageCode e on e.id = p.event_id
+      inner join
+        civicrm_value_participant_certificate c on c.entity_id = p.id
+      where
+        p.contact_id = %1
+      and
+        ifnull(c.url, '') <> ''
+      and
+        ifnull(c.geen_certificaat_genereren_voor__228, '') = ''
+      order by
+        e.start_date
+    ";
+    $sqlParams = [
+      1 => [$contactId, 'Integer'],
+    ];
+    $dao = CRM_Core_DAO::executeQuery($sql, $sqlParams);
+
+    while ($dao->fetch()) {
+      $certificates[] = [
+        'event_start_date' => $dao->event_start_date,
+        'event_id' => $dao->event_id,
+        'event_title' => $dao->event_title,
+        'certificate_url' => $dao->url,
+      ];
+    }
+
+    return $certificates;
+  }
+
   public function hasEventRegistration($contactId, $eventId) {
     $sql = "
       select
