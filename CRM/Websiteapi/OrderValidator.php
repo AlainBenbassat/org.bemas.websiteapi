@@ -24,7 +24,12 @@ class CRM_Websiteapi_OrderValidator {
 
   public function validateProduct($product) {
     $this->validateProductType($product);
-    $this->validateProductId($product);
+
+    if ($product['product_type'] == 'event') {
+      // make sure we have a product ID because that is the civi event ID
+      $this->validateProductId($product);
+    }
+
     $this->validateProductTitle($product);
     $this->validateProductUnitPrice($product);
     $this->validateProductQuantity($product);
