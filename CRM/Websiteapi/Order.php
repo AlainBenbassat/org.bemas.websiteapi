@@ -73,7 +73,7 @@ class CRM_Websiteapi_Order {
       }
 
       // Uncomment the following when we have sorted out how to deal with the training responsible
-      //$part->fillRegisteredBy($product['product_id'], $orderHeader['contact_id'], $registeredContactIds);
+      $part->fillRegisteredBy($product['product_id'], $orderHeader['contact_id'], $registeredContactIds);
     }
   }
 
