@@ -14,7 +14,7 @@ class CRM_Websiteapi_Event {
         and
           pt.class = 'Positive'
         and
-          p.role_id like '%1%'
+          p.role_id = 1
       ";
     $sqlParams = [
       1 => [$eventId, 'Integer'],
