@@ -1,6 +1,9 @@
 <?php
 
 class CRM_Websiteapi_Member {
+  private const RELTYPE_PRIMAMARY_MEMBER_CONTACT = 14;
+  private const RELTYPE_MEMBER_CONTACT = 15;
+
   public function getMembers() {
     $startDate = date('Y-m-d');
     $endDate = date('Y-m-d');
@@ -72,6 +75,46 @@ class CRM_Websiteapi_Member {
     else {
       return 0;
     }
+  }
+
+  public function getMembership(int $contactId): array {
+    if (!$this->isMember($contactId)) {
+      return [];
+    }
+
+    $membership = \Civi\Api4\Membership::get(FALSE)
+      ->addWhere('contact_id', '=', $contactId)
+      ->addOrderBy('end_date', 'DESC')
+      ->execute()
+      ->first();
+
+    return [
+      'member_since' => $membership['join_date'],
+      'primary_member_contacts' => $this->getMemberContacts($contactId, self::RELTYPE_PRIMAMARY_MEMBER_CONTACT),
+      'member_contacts' => $this->getMemberContacts($contactId, self::RELTYPE_MEMBER_CONTACT),
+    ];
+  }
+
+  private function getMemberContacts(int $contactId, int $relType): array {
+    $returnArray = [];
+
+    $contacts = \Civi\Api4\Contact::get(FALSE)
+      ->addSelect('id', 'first_name', 'last_name')
+      ->addJoin('Relationship AS relationship', 'INNER', ['relationship.relationship_type_id', '=', $relType], ['id', '=', 'relationship.contact_id_a'])
+      ->addWhere('relationship.contact_id_b', '=', $contactId)
+      ->addWhere('is_deleted', '=', FALSE)
+      ->addWhere('relationship.is_active', '=', TRUE)
+      ->addOrderBy('sort_name', 'ASC')
+      ->execute();
+    foreach ($contacts as $contact) {
+      $returnArray[] = [
+        'contact_id' => $contact['id'],
+        'first_name' => $contact['first_name'],
+        'last_name' => $contact['last_name'],
+      ];
+    }
+
+    return $returnArray;
   }
 
 }
