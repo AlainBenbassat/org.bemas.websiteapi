@@ -78,21 +78,27 @@ class CRM_Websiteapi_Member {
   }
 
   public function getMembership(int $contactId): array {
-    if (!$this->isMember($contactId)) {
-      return [];
-    }
+    $returnArr = [];
 
     $membership = \Civi\Api4\Membership::get(FALSE)
+      ->addSelect('*', 'status_id:label', 'membership_type_id:label')
       ->addWhere('contact_id', '=', $contactId)
       ->addOrderBy('end_date', 'DESC')
       ->execute()
       ->first();
 
-    return [
-      'member_since' => $membership['join_date'],
-      'primary_member_contacts' => $this->getMemberContacts($contactId, self::RELTYPE_PRIMAMARY_MEMBER_CONTACT),
-      'member_contacts' => $this->getMemberContacts($contactId, self::RELTYPE_MEMBER_CONTACT),
-    ];
+    if ($membership) {
+      $returnArr = [
+        'membership_type' => $membership['status_id:label'],
+        'membership_status' => $membership['membership_type_id:label'],
+        'member_since' => $membership['join_date'],
+        'end_date' => $membership['end_date'],
+        'primary_member_contacts' => $this->getMemberContacts($contactId, self::RELTYPE_PRIMAMARY_MEMBER_CONTACT),
+        'member_contacts' => $this->getMemberContacts($contactId, self::RELTYPE_MEMBER_CONTACT),
+      ];
+    }
+
+    return $returnArr;
   }
 
   private function getMemberContacts(int $contactId, int $relType): array {
