@@ -89,8 +89,8 @@ class CRM_Websiteapi_Member {
 
     if ($membership) {
       $returnArr = [
-        'membership_type' => $membership['status_id:label'],
-        'membership_status' => $membership['membership_type_id:label'],
+        'membership_type' => $membership['membership_type_id:label'],
+        'membership_status' => $membership['status_id:label'],
         'member_since' => $membership['join_date'],
         'end_date' => $membership['end_date'],
         'primary_member_contacts' => $this->getMemberContacts($contactId, self::RELTYPE_PRIMAMARY_MEMBER_CONTACT),
