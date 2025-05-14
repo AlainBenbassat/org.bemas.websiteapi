@@ -12,14 +12,17 @@ class CRM_Websiteapi_Member {
       select
         c.id,
         c.organization_name,
+        a.street_address,
         a.postal_code,
         a.city,
         ctry.iso_code country_code,
         w.url,
+        p.phone,
         e.email,
-        activity__nl__3 activity_nl,
-        activity__fr__5 activity_fr,
-        activity__en__4 activity_en
+        actov.label_en_US nace_activity,
+        act.activity__nl__3 activity_nl,
+        act.activity__fr__5 activity_fr,
+        act.activity__en__4 activity_en
       from
         civicrm_contact c
       inner join
@@ -34,6 +37,10 @@ class CRM_Websiteapi_Member {
         civicrm_website w on w.contact_id = c.id and w.website_type_id = 6
       left outer join
         civicrm_email e on e.contact_id = c.id and e.is_primary = 1
+      left outer join
+        civicrm_phone p on p.contact_id = c.id and p.is_primary = 1
+      left outer join
+        civicrm_option_value actov on actov.value = act.type_of_activity__nace__6 and actov.option_group_id = 85
       where
         c.is_deleted = 0
       and
@@ -105,7 +112,7 @@ class CRM_Websiteapi_Member {
     $returnArray = [];
 
     $contacts = \Civi\Api4\Contact::get(FALSE)
-      ->addSelect('id', 'first_name', 'last_name')
+      ->addSelect('id', 'first_name', 'last_name', 'job_title')
       ->addJoin('Relationship AS relationship', 'INNER', ['relationship.relationship_type_id', '=', $relType], ['id', '=', 'relationship.contact_id_a'])
       ->addWhere('relationship.contact_id_b', '=', $contactId)
       ->addWhere('is_deleted', '=', FALSE)
@@ -117,6 +124,7 @@ class CRM_Websiteapi_Member {
         'contact_id' => $contact['id'],
         'first_name' => $contact['first_name'],
         'last_name' => $contact['last_name'],
+        'job_title' => $contact['job_title'],
       ];
     }
 
