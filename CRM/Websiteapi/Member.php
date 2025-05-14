@@ -19,7 +19,7 @@ class CRM_Websiteapi_Member {
         w.url,
         p.phone,
         e.email,
-        actov.label_en_US nace_activity,
+        actov.label nace_activity,
         act.activity__nl__3 activity_nl,
         act.activity__fr__5 activity_fr,
         act.activity__en__4 activity_en
