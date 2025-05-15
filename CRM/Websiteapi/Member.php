@@ -62,7 +62,14 @@ class CRM_Websiteapi_Member {
     ];
 
     $dao = CRM_Core_DAO::executeQuery($sql, $sqlParams);
-    return $dao->fetchAll();
+    $arr = $dao->fetchAll();
+
+    for ($i = 0; $i < count($arr); $i++) {
+      $arr[$i]['primary_member_contacts'] = $this->getMemberContacts($arr[$i]['id'], self::RELTYPE_PRIMAMARY_MEMBER_CONTACT);
+      $arr[$i]['member_contacts'] = $this->getMemberContacts($arr[$i]['id'], self::RELTYPE_MEMBER_CONTACT);
+    }
+
+    return $arr;
   }
 
   public function isMember($contactId) {

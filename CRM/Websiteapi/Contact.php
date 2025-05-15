@@ -55,6 +55,7 @@ class CRM_Websiteapi_Contact {
         c.job_title,
         e.email,
         p.phone,
+        c.employer_id,
         c.organization_name
       from
         civicrm_contact c
@@ -85,6 +86,7 @@ class CRM_Websiteapi_Contact {
         'email' => $dao->email,
         'phone' => $dao->phone,
         'language_code' => $dao->language_code,
+        'employer_id' => $dao->employer_id,
         'organization_name' => $dao->organization_name,
         'job_title' => $dao->job_title,
         'is_member' => $member->isMember($contactId),
