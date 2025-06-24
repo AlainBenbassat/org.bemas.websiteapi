@@ -339,7 +339,7 @@ class CRM_Websiteapi_Participant {
         contact_id = $contactId
     ";
     $sqlParams = [
-      1 => [$phone, 'String'],
+      1 => [substr($phone, 0, 32), 'String'],
     ];
     CRM_Core_DAO::executeQuery($sql, $sqlParams);
   }
@@ -347,7 +347,7 @@ class CRM_Websiteapi_Participant {
   private function createRegistrationPhone($contactId, $phone) {
     $params = [
       'sequential' => 1,
-      'phone' => $phone,
+      'phone' => substr($phone, 0, 32),
       'contact_id' => $contactId,
       'location_type_id' => 3,
       'phone_type_id' => 6,
