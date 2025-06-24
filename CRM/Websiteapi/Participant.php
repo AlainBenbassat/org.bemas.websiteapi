@@ -352,7 +352,15 @@ class CRM_Websiteapi_Participant {
       'location_type_id' => 3,
       'phone_type_id' => 6,
     ];
-    $result = civicrm_api3('Phone', 'create', $params);
+
+    try {
+      $result = civicrm_api3('Phone', 'create', $params);
+    }
+    catch (Exception $e) {
+      \Civi::log()->warning('BEMAS Website API - Error when creating registration phone: {phone}. Already exists?', [
+        'phone' => $phone
+      ]);
+    }
   }
 
   private function getLanguagePrefix($language) {
